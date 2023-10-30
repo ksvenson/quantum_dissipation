@@ -43,6 +43,12 @@ def gap(delta, F, U, N):
     return np.sort(-np.real(evals(delta, F, U, N)))[1]
 
 
+def first_fidelity(delta, F, U, N):
+    tlist = [0]
+    H = ham(delta, F, U, N)
+    rho_ss = steadystate(H, c_ops)
+
+
 flist = np.linspace(0, 5, 25)
 
 # TODO
