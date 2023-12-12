@@ -23,16 +23,21 @@ def scaled_photon_number(state):
 
 
 def liouv_gap(op):
-    return np.abs(np.real(sp.sparse.linalg.eigs(op, k=1, which='SR', return_eigenvectors=False, tol=0.5)[0]))
+    print('calculating eigenvalues')
+    # eigs = np.sort(np.abs(np.real(np.linalg.eigvals(op))))[1]
+    # return np.abs(np.real(eigs))
+    evals, evecs = sp.sparse.linalg.eigs(op.data, k=1, which='SR', tol=0.5)
+    # eigs = sp.sparse.linalg.eigs(op.data, k=1, sigma=0, return_eigenvectors=False, tol=0.5)
+    return evals[0], evecs[:, 0]
 
 
-def first_fidelity(delta, F, U, N):
-    H = ham(delta, F, U, N)
-    rho_ss = steadystate(H, c_ops)
+def fidelity(s1, s2):
+    sqrts1 = sp.linalg.sqrtm(s1)
+    return np.trace(sp.linalg.sqrtm(sqrts1 * s2 * sqrts1))
 
 
 if __name__ == '__main__':
-    flist = np.linspace(0, 5, 100)
+    flist = np.linspace(0, 5, 25)
 
     for N in (1, 3, 10, 20):
         spn = []
@@ -41,8 +46,10 @@ if __name__ == '__main__':
             H = ham(plot_delta, gamma*f, plot_U, N)
             liouv = liouvillian(H, c_ops)
             rho_ss = steadystate(H, c_ops)
+            gap_eval, gap_evec = liouv_gap(liouv)
+
             spn.append(scaled_photon_number(rho_ss))
-            gap.append(liouv_gap(liouv.data))
+            gap.append(np.abs(np.real(gap_eval)))
         spn = np.array(spn)
         gap = np.array(gap)
 
